@@ -110,7 +110,7 @@ class Modell:
         beta = tau**(-2) * (np.sin(phi_m1-phi) - np.sin(phi-phi_p1) +
                            lmbd * ((np.sin(phi - phi_p1))/(np.sqrt(1-np.cos(phi-phi_p1))) -
                            (np.sin(phi_m1 - phi))/(np.sqrt(1-np.cos(phi_m1-phi))) ) +
-                           C *((np.exp(-K*np.sqrt(1 - 2*r*np.cos(theta - phi) + r**2))*np.sin(theta - phi)) /
+                           C * r *((np.exp(-K*np.sqrt(1 - 2*r*np.cos(theta - phi) + r**2))*np.sin(theta - phi)) /
                            (np.sqrt(1 - 2*r*np.cos(theta - phi) + r**2 ))) )
 
 
