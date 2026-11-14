@@ -145,19 +145,18 @@ class Modell:
             pickle.dump(params, f)
 
             
-    def phonon_spectrum(self, ax):
+    def phonon_spectrum(self, ax, cmap):
 
         v_belso=(self.R*self.omega)
         t=self.t
         kran_b = np.linspace(-np.pi, np.pi, self.n)
         wran_b = np.linspace(-np.pi/np.diff(t)[0],np.pi/np.diff(t)[0], len(t))
-        im = ax.pcolormesh(kran_b, wran_b, np.abs(np.fft.fftshift(np.fft.ifft(np.fft.fft(v_belso, axis=1),axis=0), axes=(1,0)))**2, norm=LogNorm(), cmap='viridis')
+        im = ax.pcolormesh(kran_b, wran_b, np.abs(np.fft.fftshift(np.fft.ifft(np.fft.fft(v_belso, axis=1),axis=0), axes=(1,0)))**2, norm=LogNorm(), cmap=cmap)
 
         ax.set_ylim(0,3)
         ax.get_figure().colorbar(im, ax=ax)
-        ax.set_ylabel(r'$\omega$ körfrekvencia', size=13)
-        ax.set_xlabel(r'$k$ hullámszám', size=13)
-        ax.set_title(r'$\omega (k)$', size=14) 
+        ax.set_ylabel(r'$\omega$ [$\mathrm{s}^{-1}$]', size=16)
+        ax.set_xlabel(r'$k$', size=16) 
         
     def energy_calc(self):
 
@@ -183,8 +182,8 @@ class Modell:
 
     def animation(self, title, zoom=True):
         '''
-        Animációt készít a modellről.
-        -- bemenetként kapja: cím , bool zoom kapcsoló
+        Animációt készít a szimulációról
+        --bemenet: cím + if zoom
         '''
 
         if zoom:
@@ -192,40 +191,32 @@ class Modell:
             zoom_window_y=self.rho-self.R + (self.rho-self.R)*0.2
             zoom_window_x=0.5
 
-            # Összes belső pont kirajzolásához
             bent = ax.scatter([], [], s=20, color='navy', alpha=0.6)
-            # A külső golyó mindig az origóban lesz (0, 0)
             kint = ax.scatter([0], [0], s=25, color='red', zorder=5)
             
-            # A tengelyeket egy fix, kicsi ablakra állítjuk be az origó (külső golyó) körül
             ax.set_xlim(-zoom_window_x, zoom_window_x)
-            # Kicsit több hely a "lent" irányba, hogy a középpont felé lévő golyók látszódjanak
             ax.set_ylim(-zoom_window_y, (self.rho-self.R)*0.2)  
             ax.set_aspect('equal')
             ax.set_title(title)
             ax.grid(True, linestyle='--', alpha=0.5)          
             
             def update(frame):
-                # Abszolút koordináták kiszámítása az adott frame-ben
                 x_out = self.rho * np.cos(self.theta[frame])
                 y_out = self.rho * np.sin(self.theta[frame])
                 
                 x_in = self.R * np.cos(self.phi[frame, :])
                 y_in = self.R * np.sin(self.phi[frame, :])
-                
-                # Koordináta-transzformáció (Eltolás)
+
                 x_rel = x_in - x_out
                 y_rel = y_in - y_out
-            
-                # Forgatás szöge
+
                 alpha = self.theta[frame]
                 
-                # Forgatási mátrix alkalmazása úgy, hogy a középpont ALUL (negatív Y) legyen
                 x_rot = -x_rel * np.sin(alpha) + y_rel * np.cos(alpha)
                 y_rot =  x_rel * np.cos(alpha) + y_rel * np.sin(alpha)
 
                 kint.set_offsets(np.column_stack(([0], [0])))
-               
+                
                 bent.set_offsets(np.column_stack((x_rot, y_rot)))
             
                 return bent, kint
